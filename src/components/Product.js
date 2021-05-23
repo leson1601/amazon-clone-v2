@@ -2,12 +2,12 @@ import React from 'react';
 import styled from 'styled-components';
 import StarRoundedIcon from '@material-ui/icons/StarRounded';
 
-function Product() {
+function Product({ product }) {
   return (
     <StyledProduct>
-      <ProductImage src='https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/46af2822-3606-4ea1-8ad0-c31c8869714d/sportswear-club-fleece-herren-hoodie-3wJ34T.png' />
+      <ProductImage src={product.image} />
       <ProductInfo>
-        <Title>Solid Hoodie Men Jacket</Title>
+        <Title>{product.title}</Title>
         <Rating>
           <StarRoundedIcon />
           <StarRoundedIcon />
@@ -15,7 +15,7 @@ function Product() {
           <StarRoundedIcon />
           <StarRoundedIcon />
         </Rating>
-        <Price>€46.95</Price>
+        <Price>€{product.price}</Price>
       </ProductInfo>
     </StyledProduct>
   );
@@ -31,6 +31,7 @@ const StyledProduct = styled.div`
 
 const ProductImage = styled.img`
   object-fit: contain;
+  max-width: 260px;
 `;
 
 const ProductInfo = styled.div`

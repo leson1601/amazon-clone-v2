@@ -16,7 +16,7 @@ function App() {
   }, [dispatch]);
   console.log(products);
   return (
-    <div className='App'>
+    <div className='app'>
       <Header />
       <NavBar />
       <Container />
