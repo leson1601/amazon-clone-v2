@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import StarRoundedIcon from '@material-ui/icons/StarRounded';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import styled from 'styled-components';
 import { useParams } from 'react-router';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { selectProducts } from '../features/productSlice';
 import { selectCart } from '../features/cartSlice';
 import { db } from '../db/firebase';
@@ -14,16 +15,21 @@ function ProductDetail() {
   const [product, setProduct] = useState({});
   const products = useSelector(selectProducts);
   const cart = useSelector(selectCart);
+  const [quantityInput, setQuantityInput] = useState(1);
 
   const addToBasket = () => {
     // dispatch(setCart(product));
     const toAddProduct = cart.find((item) => item.id === product.id);
+    console.log(quantityInput);
     if (toAddProduct) {
       db.collection('cart')
         .doc(toAddProduct.dbId)
-        .update({ quantity: toAddProduct.quantity + 1 });
+        .update({ quantity: toAddProduct.quantity + parseInt(quantityInput) });
     } else {
-      db.collection('cart').add({ ...product, quantity: 1 });
+      db.collection('cart').add({
+        ...product,
+        quantity: parseInt(quantityInput),
+      });
     }
   };
   console.log(cart);
@@ -49,6 +55,23 @@ function ProductDetail() {
             <Price>Price: €{product.price}</Price>
             <Description>{product.description}</Description>
             <CartButton>
+              <TextField
+                id='outlined-number'
+                label='Number'
+                type='number'
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                variant='outlined'
+                InputProps={{
+                  inputProps: {
+                    max: 100,
+                    min: 0,
+                  },
+                }}
+                value={quantityInput}
+                onChange={(e) => setQuantityInput(e.target.value)}
+              />
               <Button variant='contained' color='inherit' onClick={addToBasket}>
                 <ShoppingCartIcon />
                 Add to Basket
