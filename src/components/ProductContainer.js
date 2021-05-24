@@ -3,7 +3,8 @@ import styled from 'styled-components';
 import Product from './Product';
 import Grid from '@material-ui/core/Grid';
 import { useSelector } from 'react-redux';
-import { selectProducts } from '../features/product/productSlice';
+import { selectProducts } from '../features/productSlice';
+import { Link } from 'react-router-dom';
 
 function ProductContainer() {
   const products = useSelector(selectProducts);
@@ -13,7 +14,9 @@ function ProductContainer() {
         {products &&
           products.map((product) => (
             <Grid item xs={12} sm={4}>
-              <Product product={product} />
+              <Link to={`/product/${product.id}`}>
+                <Product product={product} />
+              </Link>
             </Grid>
           ))}
       </Grid>
