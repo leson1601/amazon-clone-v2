@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import logo from '../logo.png';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import SearchIcon from '@material-ui/icons/Search';
+import { selectCart } from '../features/cartSlice';
+import { useSelector } from 'react-redux';
 
 function Header() {
+  const cart = useSelector(selectCart);
+  const quantity =
+    cart &&
+    cart.reduce((accu, item) => {
+      return accu + item.quantity;
+    }, 0);
   return (
     <StyledHeader>
       <HeaderLogo href='/'>
@@ -35,7 +43,7 @@ function Header() {
 
         <HeaderCart>
           <ShoppingCartIcon />
-          <CartQuantity>0</CartQuantity>
+          <CartQuantity>{quantity}</CartQuantity>
           <CartTitle>
             <OptionLineOne>Shopping</OptionLineOne>
             <OptionLineTwo>Basket</OptionLineTwo>

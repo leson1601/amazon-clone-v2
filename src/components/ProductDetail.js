@@ -6,18 +6,27 @@ import styled from 'styled-components';
 import { useParams } from 'react-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectProducts } from '../features/productSlice';
-import { setCart } from '../features/cartSlice';
+import { selectCart } from '../features/cartSlice';
+import { db } from '../db/firebase';
 
 function ProductDetail() {
   let { productId } = useParams('productId');
   const [product, setProduct] = useState({});
   const products = useSelector(selectProducts);
-
-  const dispatch = useDispatch();
+  const cart = useSelector(selectCart);
 
   const addToBasket = () => {
-    dispatch(setCart(product));
+    // dispatch(setCart(product));
+    const toAddProduct = cart.find((item) => item.id === product.id);
+    if (toAddProduct) {
+      db.collection('cart')
+        .doc(toAddProduct.dbId)
+        .update({ quantity: toAddProduct.quantity + 1 });
+    } else {
+      db.collection('cart').add({ ...product, quantity: 1 });
+    }
   };
+  console.log(cart);
 
   useEffect(() => {
     setProduct(products.find((item) => item.id === parseInt(productId)));

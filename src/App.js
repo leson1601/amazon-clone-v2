@@ -3,17 +3,33 @@ import './App.css';
 import Container from './components/Container';
 import Header from './components/Header';
 import NavBar from './components/NavBar';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setProducts } from './features/productSlice';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { setCart, selectCart } from './features/cartSlice';
 import ProductDetail from './components/ProductDetail';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { db } from './db/firebase';
 
 function App() {
   const dispatch = useDispatch();
+  const cart = useSelector(selectCart);
+
   useEffect(() => {
     fetch('https://fakestoreapi.com/products')
       .then((res) => res.json())
       .then((json) => dispatch(setProducts(json)));
+    db.collection('cart').onSnapshot((snapshot) => {
+      dispatch(
+        setCart(
+          snapshot.docs.map((item) => {
+            return {
+              ...item.data(),
+              dbId: item.id,
+            };
+          })
+        )
+      );
+    });
   }, [dispatch]);
 
   return (
