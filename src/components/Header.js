@@ -1,19 +1,62 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import logo from '../logo.png';
+import Button from '@material-ui/core/Button';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import SearchIcon from '@material-ui/icons/Search';
 import { selectCart } from '../features/cartSlice';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import { selectUser } from '../features/userSlice';
 
 function Header() {
+  var provider = new firebase.auth.GoogleAuthProvider();
   const cart = useSelector(selectCart);
+  const user = useSelector(selectUser);
   const quantity =
     cart &&
     cart.reduce((accu, item) => {
       return accu + item.quantity;
     }, 0);
+
+  const login = () => {
+    firebase
+      .auth()
+      .signInWithPopup(provider)
+      .then((result) => {
+        /** @type {firebase.auth.OAuthCredential} */
+        var credential = result.credential;
+
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        var token = credential.accessToken;
+        // The signed-in user info.
+        var user = result.user;
+        // ...
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        console.log(error);
+      });
+  };
+
+  const logout = () => {
+    firebase
+      .auth()
+      .signOut()
+      .then(() => {
+        // Sign-out successful.
+        console.log('signed out');
+      })
+      .catch((error) => {
+        // An error happened.
+        console.log(error);
+      });
+  };
+
   return (
     <StyledHeader>
       <HeaderLogo href='/'>
@@ -35,19 +78,35 @@ function Header() {
         </HeaderSearchIcon>
       </HeaderSearch>
 
-      <HeaderInfo>
+      <HeaderInfo onClick={!user && login}>
         <HeaderUser>
-          <OptionLineOne>Hello, Sign in</OptionLineOne>
+          <OptionLineOne>
+            Hello, {user ? user.displayName : 'Sign in'}
+          </OptionLineOne>
           <OptionLineTwo>Account & Lists</OptionLineTwo>
+          {user && (
+            <SignOutButton>
+              <Button
+                variant='contained'
+                size='large'
+                startIcon={<ExitToAppIcon />}
+                onClick={logout}
+              >
+                Sign out
+              </Button>
+            </SignOutButton>
+          )}
         </HeaderUser>
 
         <HeaderCart>
-          <ShoppingCartIcon />
-          <CartQuantity>{quantity}</CartQuantity>
-          <CartTitle>
-            <OptionLineOne>Shopping</OptionLineOne>
-            <OptionLineTwo>Basket</OptionLineTwo>
-          </CartTitle>
+          <Link to='/cart'>
+            <ShoppingCartIcon />
+            <CartQuantity>{quantity}</CartQuantity>
+            <CartTitle>
+              <OptionLineOne>Shopping</OptionLineOne>
+              <OptionLineTwo>Basket</OptionLineTwo>
+            </CartTitle>
+          </Link>
         </HeaderCart>
       </HeaderInfo>
     </StyledHeader>
@@ -141,14 +200,47 @@ const HeaderUser = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
+  cursor: pointer;
 
   border: 1px solid var(--background-color);
   padding: 0 10px;
   border-radius: 2px;
+  position: relative;
+
+  ::after {
+    display: block;
+    content: '';
+    width: 100%;
+    height: 10px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
 
   :hover {
     border: 1px solid white;
     cursor: pointer;
+  }
+`;
+
+const SignOutButton = styled.div`
+  position: absolute;
+  top: 110%;
+  left: 0;
+  display: none;
+  ${HeaderUser}:hover & {
+    display: block;
+  }
+
+  .MuiButton-contained {
+    background-color: var(--primary-color);
+  }
+
+  .MuiButton-containedSizeLarge {
+    padding: 4px 6px;
+  }
+  .MuiButton-label {
+    min-width: 110px;
   }
 `;
 
@@ -166,24 +258,27 @@ const OptionLineTwo = styled.span`
 `;
 
 const HeaderCart = styled.div`
-  height: 50px;
-  display: flex;
-  align-items: center;
-  min-width: 50px;
-
   padding: 0 10px;
   border: 1px solid var(--background-color);
   border-radius: 2px;
-  position: relative;
 
   :hover {
     border: 1px solid white;
     cursor: pointer;
   }
-  .MuiSvgIcon-root {
-    fill: white;
-    font-size: 38px;
-    margin-right: 5px;
+
+  a {
+    display: flex;
+    position: relative;
+    align-items: center;
+    height: 50px;
+    min-width: 50px;
+
+    .MuiSvgIcon-root {
+      fill: white;
+      font-size: 38px;
+      margin-right: 5px;
+    }
   }
 `;
 

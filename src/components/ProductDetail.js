@@ -9,30 +9,38 @@ import { useSelector } from 'react-redux';
 import { selectProducts } from '../features/productSlice';
 import { selectCart } from '../features/cartSlice';
 import { db } from '../db/firebase';
+import { selectUser } from '../features/userSlice';
+import { CART_KEY } from '../app/store';
 
 function ProductDetail() {
   let { productId } = useParams('productId');
   const [product, setProduct] = useState({});
   const products = useSelector(selectProducts);
+  const user = useSelector(selectUser);
   const cart = useSelector(selectCart);
   const [quantityInput, setQuantityInput] = useState(1);
 
   const addToBasket = () => {
     // dispatch(setCart(product));
-    const toAddProduct = cart.find((item) => item.id === product.id);
-    console.log(quantityInput);
-    if (toAddProduct) {
-      db.collection('cart')
-        .doc(toAddProduct.dbId)
-        .update({ quantity: toAddProduct.quantity + parseInt(quantityInput) });
+    if (user) {
+      const toAddProduct = cart.find((item) => item.id === product.id);
+      console.log(quantityInput);
+      if (toAddProduct) {
+        db.collection('cart')
+          .doc(toAddProduct.dbId)
+          .update({
+            quantity: toAddProduct.quantity + parseInt(quantityInput),
+          });
+      } else {
+        db.collection('cart').add({
+          ...product,
+          quantity: parseInt(quantityInput),
+        });
+      }
     } else {
-      db.collection('cart').add({
-        ...product,
-        quantity: parseInt(quantityInput),
-      });
+      localStorage.set(CART_KEY, ['test']);
     }
   };
-  console.log(cart);
 
   useEffect(() => {
     setProduct(products.find((item) => item.id === parseInt(productId)));
@@ -57,7 +65,7 @@ function ProductDetail() {
             <CartButton>
               <TextField
                 id='outlined-number'
-                label='Number'
+                label='Quantity'
                 type='number'
                 InputLabelProps={{
                   shrink: true,
@@ -69,6 +77,7 @@ function ProductDetail() {
                     min: 0,
                   },
                 }}
+                size='small'
                 value={quantityInput}
                 onChange={(e) => setQuantityInput(e.target.value)}
               />
@@ -147,6 +156,10 @@ const Description = styled.p`
 
 const CartButton = styled.div`
   margin-top: 20px;
+
+  .MuiFormControl-root.MuiTextField-root {
+    margin-right: 10px;
+  }
   .MuiButton-contained {
     background-color: var(--primary-color);
   }

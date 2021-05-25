@@ -3,21 +3,29 @@ import './App.css';
 import Container from './components/Container';
 import Header from './components/Header';
 import NavBar from './components/NavBar';
+import Cart from './components/Cart';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { setProducts } from './features/productSlice';
-import { setCart, selectCart } from './features/cartSlice';
+import { setCart } from './features/cartSlice';
+import { selectUser, setUser } from './features/userSlice';
 import ProductDetail from './components/ProductDetail';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { db } from './db/firebase';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import firebase from 'firebase/app';
+import 'firebase/auth';
 
 function App() {
   const dispatch = useDispatch();
-  const cart = useSelector(selectCart);
+  const user = useSelector(selectUser);
 
   useEffect(() => {
+    //fetch products data from API
     fetch('https://fakestoreapi.com/products')
       .then((res) => res.json())
       .then((json) => dispatch(setProducts(json)));
+
+    //save products data from API to store of redux
     db.collection('cart').onSnapshot((snapshot) => {
       dispatch(
         setCart(
@@ -30,6 +38,16 @@ function App() {
         )
       );
     });
+
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        // User is signed in.
+        dispatch(setUser(user));
+      } else {
+        // No user is signed in.
+        dispatch(setUser(null));
+      }
+    });
   }, [dispatch]);
 
   return (
@@ -41,8 +59,8 @@ function App() {
           <Route path='/product/:productId'>
             <ProductDetail />
           </Route>
-          <Route path='/about'>
-            <h3>About</h3>
+          <Route path='/cart'>
+            <Cart />
           </Route>
           <Route path='/'>
             <Container />
