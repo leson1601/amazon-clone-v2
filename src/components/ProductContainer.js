@@ -13,7 +13,7 @@ function ProductContainer() {
       <Grid container spacing={3}>
         {products &&
           products.map((product) => (
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={4} key={product.id}>
               <Link to={`/product/${product.id}`}>
                 <Product product={product} />
               </Link>

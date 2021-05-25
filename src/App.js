@@ -8,7 +8,7 @@ import Cart from './components/Cart';
 import { useDispatch, useSelector } from 'react-redux';
 import { setProducts } from './features/productSlice';
 import { setCart } from './features/cartSlice';
-import { selectUser, setUser } from './features/userSlice';
+import { setUser } from './features/userSlice';
 import ProductDetail from './components/ProductDetail';
 import { db } from './db/firebase';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
@@ -17,7 +17,6 @@ import 'firebase/auth';
 
 function App() {
   const dispatch = useDispatch();
-  const user = useSelector(selectUser);
 
   useEffect(() => {
     //fetch products data from API
@@ -42,7 +41,8 @@ function App() {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         // User is signed in.
-        dispatch(setUser(user));
+        const loggedInUser = { username: user.displayName, email: user.email };
+        dispatch(setUser(loggedInUser));
       } else {
         // No user is signed in.
         dispatch(setUser(null));
